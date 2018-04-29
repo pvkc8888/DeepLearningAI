@@ -1,0 +1,259 @@
+Neural Networks and Deep Learning by deeplearning.ai
+Week 1 @created(27-04-18 11:32):
+  Week 1 was just basic intro ML. What is neural network, why is deep learning taking off, and one quiz.
+
+Week 2 @created(27-04-18 11:33):
+  Binary Classification:
+    Images are stored in computer by their RGB values of each pixel i.e., a picture of size (64 x 64) will be stored in an ndarray of size (64 x 64 x 3) where each the 0th layer corresponds to red, 1st layer corresponds to blue and 2nd layer corresponds to green. If the image is black and white, we will have only one layer of values 1 or 0. Sometimes, there might be a 4th row which is attributed to the brightness of the image.
+    This matrix is then transformed into a single vector before using it in the model, this is done to reduce the compuatation time and efficiency.
+    The way we convert the matrix into a column vector is by piling up all the red pixel values, followed by blue and green. In each dimension, we go from left to right and top to bottom.
+    For ex, the above mentioned image (64 x 64 x 3) will be converted to n = Nx = 12288 vector.
+    Throughout this course, a single pair of training data is represented as (x, y) where x is a column vector and y takes value 0 or 1 since its binary classification.
+    Finally, the entire training data is stacked into columns to make the training matrix X, where each column is an individual training image.
+    implementing neural networks using
+    this convention of images stacked column wise, will make the implementation much easier.
+    Hence the final X matrix will be of the form (Nx x m)
+    Similarly, we can stack the dependent variable to generate Y. Y = [y1, y2, y3, ... , ym] shape of Y is (1, m)
+
+
+  Logistic Regression:
+     Given X, want (y) where (y) = P(y=1|x) where x is the given training matrix.
+     Parameters of logistic Regression-
+     w - x dimensional vector and
+     b - real number
+     We can predict (y) by using these parameters. but we cannot use linear regression because the y = wx + b will not always lie between 0 and 1. hence we apply sigmoid function on to this function to reduce our range of outputs to 0 and 1
+     sigmoid(z) = 1/(1-e^-z)
+     If z is very large = sigmoid(z) = 1
+     If z is very negative = sigmoid(z) = 0
+     Hence our range is between 0 and 1
+     Hence, our goal is to find correct w and b so as to make a better prediction (y) equal to 1
+
+  Logistic Regression Cost function:
+     Our aim is to make a model that will be able to predict (y)i as close to yi as possible. we know that (y)i = sigma(wx+b)
+     One way to test how good our model is performing by calculating the loss function. Usually, the loss function is calculated as MSE, but in this case, it doesn't help in the case of gradient descent. Hence, we use another type of loss function defined by
+     L((y), y) = -(ylog((y))+(1-y)(log(1-(y))))
+     This will make sure that when y = 1, we force the (y) to approach one, and when y = 0, we force (y) to approach zero.
+     Similar to loss function, we can also calculate cost fucntion for the entire model as
+     J(w, b) = 1/m * (sum(L((y), y)))
+     Thus, loss function is applied to one sample, and cost function for the entire model.
+
+ Gradient Descent @created(27-04-18 19:28):
+     Now that we defined cost function, our goal is to find w and b parameters, that will reduce the cost function. The reason we chose the above mentioned function as the cost function is because, we want the cost function to be a convex function which will help us find the local minima quickly.
+     After every step in gradient descent, we try to approach as close to the global minimum as possible.
+     They way to do this is by updating w and b after every step
+     w := w - alpha * (dJw)
+     similarly we apply the same formula for b
+     b := b - alpha * (dJ(w, b)/db)
+ Derivatives @created(27-04-18 20:35) :
+     Just the basics about slope and derivatives. straight line doesnt change its slope.
+     curves have varying slope.
+     d(ln(a))/da = 1/a
+
+ Computation Graph @created(27-04-18 20:48):
+     J(a, b ,c) = 3 (a + bc)
+     let u = bc
+     v = a + u
+     the computation graph organizes a computation with a blue arrow, left-to-right computation in the example mentioned.
+     One step of backward propagation on a computation graph yields derivative of final output variable.
+     derivatives with computation graph -
+     In the above examples, we can see that J = 3 * v, therefore, dj/dv = 3.
+     If we calculate dj/da, we can do chain rule like dj/dv * dv/da
+     So this little illustration shows hows by having computed dJ/dv,that is, derivative with respect to this variable, it can then help you to compute dJ/da. And so that's another step of this backward calculation.
+     The reason we are calculating derivatives is because, they will help us optimize the final output in our model.
+     In this course, we take the variable dv = dj/dv
+     Hence, a forward or left to right calculation to compute the cost function such as J that you might want to optimize. And a backwards or a right to left calculation to compute derivatives.
+ Logistic Regression Gradient Descent @created(27-04-18 21:10):
+   Using all the initial equations of logistic regression we can calculate the derivatives of loss function will other independent variables.
+   some important derivatives to note -
+     dz = a - y
+     dw = x * dz
+     db = dz
+
+ Logistic regression on m examples @created(27-04-18 22:38):
+   We know the cost function
+   hence we can calculate the derivatives for cost function with respect to intermediate variables.
+   The way we implement this for m inputs is -
+     1) initialize J = 0, dw1 = 0, dw2 = 0, db = 0
+     2) for i = 1 to m
+          zi = wi*xi + b
+          ai = sigmoid(zi)
+          Jt = -[yi * log (ai) + (1-yi)log(1-ai)]
+          dzi = ai - yi
+          dwi += xi*dzi
+          db += dz
+      3) J /= m
+      4) dwi /= m
+      5) db /= m
+      6) dwi = dJ/dw
+      7) w1 = w1 - alpha(dw1)
+         w2 = w2 - alpha(dw2)
+         b = b - alpha(db)
+      The only problem with this type of implementation is the use of 'for' loops, as the size of dataset increases, the computation time also increases.
+      Hence, we use vectorization to eliminate for loops from our model
+ Vectorization @created(27-04-18 22:49):
+   This is the way to multiply two arrays (find the dot product) without using a for loop. This is needed to save computation time.
+   Usage -
+     np.dot(w,x)
+   this variation is becuase, the np.dot() function uses SIMD (Single instruction Multiple data) and parallelism technique from GPU and CPU. hence the faster speeds.
+   Vectorization doesnt explicitly need a GPU.
+   Hence, whenever possible, avoid explicit for-loops.
+   numpy has many inbuilt functions that can implement vectorization,
+   np.exp()
+   np.log()
+   np.abs()
+   np.maximum(v, 0)
+   v ** 2
+   1/v
+   are some of the examples
+   using these concepts we can get rid of the for loops that we were using in the logistic regression example.
+ Vectorizing Logistic Regression @created(27-04-18 23:04):
+   To calculate z
+     Z = [z1 z2 z3 .. zm] = w * X + [b b b ...b]
+     Z = np.dot(w.T, X) + b
+     in this case we can see that we didnt actually create a b vector, but python understand what we want and adds b to all the elements. This is also known as broadcasting.
+     Similarly we can calculate A.
+     db = 1/m * np.sum(dZ)
+     Hence, our final implementation can be-
+     Z = wTX + b = np.dot(w.T, X) + b
+     A = sigmoid(Z)
+     dZ = A-Y
+     dW = 1/m * (X*dzT)
+     db = 1/m * np.sum(dZ)
+     w = w - alpha(dw)
+     b = b - aplha(db)
+ Broadcasting in Python @created(27-04-18 23:19):
+   Broadcasting can be used to make the python code run faster.
+   value = A.sum(axis = 0) axis = 0 means sum vertically.
+   the way this works is, lets say you wanna add a (m, n) matrix to another (1, n) matrix, python will copy the elements in the (1,n) matrix vertically to make a (m, n) matrix and perform the arithmetic. Similarly we can do it horizontally.
+
+ A note on python/numpy vectors:
+   dont use rank one vectors ie variables that have data type of (5, ) it is not column vector or an row vector.
+   Always use matrices.
+
+ Notes from assignment:
+   Another common technique we use in Machine Learning and Deep Learning is to normalize our data. It often leads to a better performance because gradient descent converges faster after normalization.
+
+   Also, a 3d array is for the form (a,b,c) they a is the number of matrices, b,c is the size of each matrix
+
+   softmax is a normalizing function used when your algorithm needs to classify two or more classes.
+
+
+    np.exp(x) works for any np.array x and applies the exponential function to every coordinate
+
+    the sigmoid function and its gradient
+
+    image2vector is commonly used in deep learning
+
+    np.reshape is widely used. In the future, you'll see that keeping your matrix/vector dimensions straight will go toward eliminating a lot of bugs.
+
+    numpy has efficient built-in functions
+    broadcasting is extremely useful
+
+    [h5py](http://www.h5py.org) is a common package to interact with a dataset that is stored on an H5 file.
+
+    One common preprocessing step in machine learning is to center and standardize your dataset, meaning that you substract the mean of the whole numpy array from each example, and then divide each example by the standard deviation of the whole numpy array. But for picture datasets, it is simpler and more convenient and works almost as well to just divide every row of the dataset by 255 (the maximum value of a pixel channel).
+
+    In deep learning, we usually recommend that you:
+    Choose the learning rate that better minimizes the cost function.
+    If your model overfits, use other techniques to reduce overfitting. (We'll talk about this in later videos.)
+
+Week 3 @created(28-04-18 20:03):
+  Neural networks overview:
+    Neural network will have more layers before we make our prediction. Hence, we have more variables, z, w, b one for each layer. Its basically like taking a logistic regression that we saw previously and repeating it twice.
+
+  Neural Networks Representation:
+    input layer - Hidden layer - output layer
+    Its called hidden layer because, you dont see its values in the training set.
+    Usually, in the NN network, the input layer is not counted/ or sometimes counted as 0th layer. Hence a nn that has one hidden layer and an output layer is called a 2 layer NN.
+
+  Computing a Neural Network's Output:
+    a[l]i = [l] layer, i = node in that layer.
+    z[l]i = [l] layer, i = node in that layer.
+    z[1] = by using vectorization, we can calculate z[1] as
+      [w[1]1T       [X1      [b[1]1]
+       w[1]2T   *    X2   +  [b[1]2]
+       w[1]3T        X3]     [b[1]3]
+       w[1]4T]               [b[1]4]
+
+  Vectorizing across multiple examples:
+    a[l](i) = [l] layer, (i) training sample i
+    we can vectorize the implementation by the following equations
+      Z[1] = W[1]X + b
+      A[1] = sigmoid(Z[1])
+      Z[2] = W[2]A[1] + b[2]
+      A[2] = sigmoid[Z2] = yhat
+    The columns in A correspond to training samples and rows correspond to hidden layer.
+
+  Activation Fuctions:
+    Until now, we were using the sigmoid function as the activation function. But turns out, there are other activation functions that are much more efficient than the sigmoid function. One such function is tanh function which is a shifted variation of sigmoid function. tanh function ranges from -1 to 1.
+    This will help in maintaining the mean of the values close to zero, which will make it easier for the next layer to train.
+    But for the output layer, since we know that y ranges from 0 to 1, we want yhat to be in that range too, hence sigmoid function is still preferred for the output activation function.
+    But there is one downside to these tanh and sigmoid functions, if the z value is large, either positive or negative, the slope at that point is almost 0, this will not help in gradient descent and the model will learn slowly.
+    To overcome this, we can use ReLU function which is defined as max(0,z), it has zero slope when Z is negative and increasing slope when z is positive.
+    Leaky relu is modified version of relu which will has a slight slope in the negative z direction as well.
+    To conclude, use sigmoid only when compulsory(like binary classification) otherwise use tanh for output layer and use relu/leaky relu for the hidden layers
+
+  Why do you need non-linear activation functions?:
+    Lets say we dont use a non-linear function and just equate a[1] = z[1], then we can show that the output layer can be expressed as a linear relation to input layer which is similar to the case in logistic regression. Hence, we need to add somewhere so that the model is non-linear and can get good predictions.
+    But, there is one exception where we can use linear activation or identity activation. It is in the case of linear regression problems, where the output is a number that we have to predict. Even in this case, the hidden layers should not be linear activation. only the output layer can be linear. even in this case, we can use relu to eliminate negative values.
+
+  Derivatives of activation functions:
+    Sigmoid activation function-
+      g'z = g(z)*(1-g(z)) = a(1-a)
+
+    Tanh activation function -
+      g'z = 1 - tanh(z)^2 = 1-a^2
+
+    Relu activation function-
+      g'z = 0 if z<0
+            1 if z>= 0
+
+  Gradient descent on Neural networks:
+    lets say we are only having one hidden layer and one output variable,
+    Parameters =
+      w[1] (n[1], n[0])
+      b[1] (n[1], 1)
+      w[2] (n[2], n[1])
+      b[2] (n[2], 1)
+    Cost function
+      J(w[1], b[1], w[2], b[2]) = 1/m *(sum(L(yhat, y)))
+    It is also effective if we can randomly intialise our parameters rather than initializing all variables to 0.
+    - Forward Propagation:
+      Z[1] = W[1]X + b
+      A[1] = activation(Z[1])
+      Z[2] = W[2]A[1] + b[2]
+      A[2] = sigmoid[Z2] = yhat
+
+    - Back Propagation:
+      dZ[2] = A[2] - Y
+      dw[2] = 1/m * (dZ[2]A[1].T)
+      db[2] = 1/m * (np.sum(dZ[2], axis = 1, keepdims = True))
+      dZ[1] = W[2].T*dZ[2] * g[1]' Z[1]
+      elementwise product.
+      dw[1] = 1/m * dZ[1]X.T
+      db[1] = 1/m * np.sum(dZ[1], axis = 1, keepdims = True)
+
+  Random Initialization:
+    The reason we dont intialise the initial parameters to zeros is because, if we do so, because of symmetry all the rows in the W matrix are going to be same. They continue to remain same even after updating them after one iteration. This will continue no matter how many iterations we do. Hence, even as we implement more layers, there's nothing to get rid of symmetry. Hence, its just waste of time.
+    Hence we intialise them as
+      w[1] = np.random.randn((2,2)) * 0.01
+      b[1] = np.zeros((2,1))
+      we use 0.01 as constant because, if the value is large, the Z value will be large and the activation function value will be large. But we know that the slopes at large values for activation functions is low. Hence, the gradient descent will also be low. Which means we will learn slowly. to overcome this, we choose small value of constant.
+
+    In case of logistic regression,we can intialise to zeros because
+    Yes, Logistic Regression doesn't have a hidden layer. If you initialize the weights to zeros, the first example x fed in the logistic regression will output zero but the derivatives of the Logistic Regression depend on the input x (because there's no hidden layer) which is not zero. So at the second iteration, the weights values follow x's distribution and are different from each other if x is not a constant vector.
+
+    Notes from assignment:
+      The general methodology to build a Neural Network is to:
+      1. Define the neural network structure ( # of input units,  # of hidden units, etc).
+      2. Initialize the model's parameters
+      3. Loop
+          Implement forward propagation
+          Compute loss
+          Implement backward propagation to get the gradients
+          Update parameters (gradient descent)
+
+
+
+
+
