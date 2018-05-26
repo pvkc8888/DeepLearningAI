@@ -1,0 +1,133 @@
+Week 1:
+  Seeting up your ML Application:
+     - Test/Train/Dev Sets:
+       #layers, #hidden units, learning rates, activation functions. It is a highly iterative process where we usually start with an idea, write the code for it, experiment with the different parameters and refine our idea and continue the process again.
+       The intuition in one field on ML usually doesn't transfer to another field in ML. This is because of the amount of data may vary, the computation hardware may wary etc.
+       Data> training set - Hold-out cross validation set/ Development set - test set.
+       Previously the split used to be 60/20/20 or 70/30. But in recent times, as the amount of data is significantly higher, the split can be taken as 98/2/2 or sometimes where we have more than million objects, the split can be 99.5/.4/.1
+       Mismatched Train/test distribution occurs when the source of the data for the training and the test/dev sets are different. One way to overcome this problem is by making sure that the dev and test sets come from the same distribution.
+       Also when people say they have only train/test set, they mean train/dev set.
+
+     - Bias/ Variance:
+       if not a good fit, underfitting or high bias.
+       if fits the data perfectly with non-linear models, overfitting, high variance.
+       reasonable classifier, some error but good.
+       for high dimension data to observe the bias, variance, we can look at the train set error and dev set error.
+       If training set error is 1% and dev set error is 11%, this has high variance.
+       If training set error is 15% and dev set error is 16%, assuming that humans acheive 0% error, then the algorithm isnt performing well on the training set and can be classified as high bias and underfitting the data.
+       If the training set error is 15% and dev set error is 30%, high bias and high variance.
+       If the training set error is 0.5% and dev set error is 1%, low bias and low variance.
+       The above classification is done based on assuming that human error is 0%, but if the data is bad then the human error can be increased.
+       linear functions usually have high bias.
+       Depending on whether the model has high bias or high variance, we can systematically increase the model performance.
+
+     - Basic recipe for ML:
+       High bias (training data performance) > bigger network, train longer, (NN architecture search) we can do that until we can fit the training data better.
+       High Variance (dev set performance) > More data, Regularization, (NN architectures search)
+       keep repeating until you get low bias and low variance.
+       In the modern ML, we dont have to worry about bias/variance tradeoff because of the easy access to bigger network and more data.
+  Regularizing your NN:
+    - Regularization:
+      If the NN is overfitting/ high variance, getting more data will help but often thats not possible. So we can use regularization techiniques to solve this issue.
+      Okay so I am not gonna write all the formula here but the intuition is we have to add another term called L2 regularization to the cost function. This will change the dw as an extra term will be added there as well.
+      So when updating, the W matrix, we slightly reduce it, hence it also known as 'weight decay'
+      There is also L1 regularization where the formula is a little bit different but the reason some people might use it is we get more sparse (zero) values in this case which will help computationaly but its not much so majority of people dont use it.
+      The NN L2 regularization is also known as Forbenius Norm.
+
+    - Why regularization reduces overfitting?
+      The intuition is that by setting lambda to be really big, we force W to go close to zero which will result in a simpler network where we can get the 'just right' value of lambda.
+
+    - Dropout Regularization:
+      We zero out different hidden units.
+      For layer 3, and if keep-prob = 0.8
+        d3 = np.random.rand(a3.shape[0], a3.shape[1]) < keep-prob
+        a3 = np.mutiply(a3, d3)
+        a3 /= keep-prop
+      At making predictions at test time, we should not include drop out.
+
+    - Understanding Dropout:
+      Cant rely on any one feature, so have to spread out weights.
+      We force the node to spread out its weights instead of giving all weight to one incoming node. This will help shrink weights.
+      we can set keep-prob individually to each layer.
+      The disadvantage is that the cost function J is not defined properly and hard to calculate or doublecheck.
+
+    - Other Regularization Methods:
+      By flipping the image.
+      Random crop and zoom image.
+      we can generate more data.
+      Early stopping also helps sometimes, but we try to do two tasks at once, optimize cost function and not overfitting. This might not produce best results.
+      L2 regularization is better.
+  Setting up your optimization problem:
+    - Normalising inputs:
+      While training a NN, one of the technique to speed up the NN is to normalize the inputs.
+      first step is to zero out the mean of the training sample.
+      second step is to normalize the variances.
+      Use the same mu and sigma for the test data.
+      The reason we need to normalize is that the cost function might look in the form of an elongated boat in one case and if we normalize then it will look like concentric circles and can be easier to find the best parameters.
+
+    - Vanishing / Exploding gradients:
+      Training a very large NN can sometimes have a problem of vanishing/exploding gradients.
+      This can be solved by properly initialising the weights.
+      We can intialise the weights by setting the variance close to one.
+      w[l] = np.random.randn(shape) * np.sqrt(2/n^^[l-1])
+      This is for relu activation function.
+
+    - Gradient Checking:
+      Take W1, B1, W2, B2,.. and concatenate into a single matrix called theta
+      similarly, Take dW1, dB1, dW2, dB2,.. and concatenate into a single matrix called dtheta
+      Now our cost function will be a function of J(theta)
+      for each e
+          dthetaapprox = J(theta1+E, theta2+E,...) - J(theta1-E,...)/2E
+          check if dthetaapprox = dtheta
+          to check if they are equal,
+            ||dthetaapprox - dtheta||/||dthetaapprox||+||dtheta||
+
+    - Gradient Checking Implementation Notes
+      Dont use in training - only to debug
+      If algorithm fails to grad check, look at components to try to identify bug.
+      Remember regularization term.
+      Doesnt work with dropout.
+      Run at random initializations; perhaps again after some training.
+  Initialization example:
+    - What happens when you initialise the weight terms to zeros-
+      In general, initializing all the weights to zero results in the network failing to break symmetry. This means that every neuron in each layer will learn the same thing, and you might as well be training a neural network with n[l]=1n[l]=1 for every layer, and the network is no more powerful than a linear classifier such as logistic regression.
+      The weights W[l] should be initialized randomly to break symmetry.
+      It is however okay to initialize the biases b[l]b[l] to zeros. Symmetry is still broken so long as W[l] is initialized randomly.
+    - What happens when you initialize with random large values-
+      The cost starts very high. This is because with large random-valued weights, the last activation (sigmoid) outputs results that are very close to 0 or 1 for some examples, and when it gets that example wrong it incurs a very high loss for that example. Indeed, when log(a[3])=log(0), the loss goes to infinity.
+      Poor initialization can lead to vanishing/exploding gradients, which also slows down the optimization algorithm.
+      If you train this network longer you will see better results, but initializing with overly large random numbers slows down the optimization.
+      - In summary:
+      Initializing weights to very large random values does not work well.
+      Hopefully intializing with small random values does better.
+     - Things to remember from this excercise:
+      Different initializations lead to different results
+      Random initialization is used to break symmetry and make sure different hidden units can learn different things
+      Don't intialize to values that are too large
+      He initialization works well for networks with ReLU activations.
+  Regularization example:
+    The value of λ is a hyperparameter that you can tune using a dev set.
+    L2 regularization makes your decision boundary smoother. If λ is too large, it is also possible to "oversmooth", resulting in a model with high bias.
+    - Why L2 Regularization works:
+      L2-regularization relies on the assumption that a model with small weights is simpler than a model with large weights. Thus, by penalizing the square values of the weights in the cost function you drive all the weights to smaller values. It becomes too costly for the cost to have large weights! This leads to a smoother model in which the output changes more slowly as the input changes.
+      What you should remember -- the implications of L2-regularization on
+      The cost computation
+          A regularization term is added to the cost
+      The backpropagation function
+          There are extra terms in the gradients with respect to weight matrices
+      Weights end up smaller ("weight decay")
+          Weights are pushed to smaller values.
+    - Drop out model:
+      The idea behind drop-out is that at each iteration, you train a different model that uses only a subset of your neurons. With dropout, your neurons thus become less sensitive to the activation of one other specific neuron, because that other neuron might be shut down at any time.
+      A common mistake when using dropout is to use it both in training and testing. You should use dropout (randomly eliminate nodes) only in training.
+      What you should remember about dropout:
+        Dropout is a regularization technique.
+        You only use dropout during training. Don't use dropout (randomly eliminate nodes) during test time.
+        Apply dropout both during forward and backward propagation.
+        During training time, divide each dropout layer by keep_prob to keep the same expected value for the activations. For example, if keep_prob is 0.5, then we will on average shut down half the nodes, so the output will be scaled by 0.5 since only the remaining half are contributing to the solution. Dividing by 0.5 is equivalent to multiplying by 2. Hence, the output now has the same expected value. You can check that this works even when keep_prob is other values than 0.5.
+    Note that regularization hurts training set performance! This is because it limits the ability of the network to overfit to the training set. But since it ultimately gives better test accuracy, it is helping your system.
+
+  Gradient Checking:
+    ∂J/∂θis what you want to make sure you're computing correctly.
+    You can compute J(θ+ε) and J(θ−ε) (in the case that θθ is a real number), since you're confident your implementation for JJ is correct.
+
